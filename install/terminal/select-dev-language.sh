@@ -4,8 +4,8 @@
 if [[ -v OMAKUB_FIRST_RUN_LANGUAGES ]]; then
   languages=$OMAKUB_FIRST_RUN_LANGUAGES
 else
-  AVAILABLE_LANGUAGES=("Ruby on Rails" "Node.js" "Go" "PHP" "Python" "Elixir" "Rust" "Java")
-  languages=$(gum choose "${AVAILABLE_LANGUAGES[@]}" --no-limit --height 10 --header "Select programming languages")
+  AVAILABLE_LANGUAGES=("Node.js" "Go" "Python" "Java" "C++" "Flutter" "Ruby on Rails" "PHP" "Elixir" "Rust")
+  languages=$(gum choose "${AVAILABLE_LANGUAGES[@]}" --no-limit --height 12 --header "Select programming languages")
 fi
 
 if [[ -n "$languages" ]]; then
@@ -41,6 +41,18 @@ if [[ -n "$languages" ]]; then
       ;;
     Java)
       mise use --global java@latest
+      ;;
+    C++)
+      sudo apt install -y build-essential g++ cmake gdb
+      ;;
+    Flutter)
+      if [[ ! -d "$HOME/.flutter" ]]; then
+        git clone https://github.com/flutter/flutter.git -b stable "$HOME/.flutter"
+        echo 'export PATH="$PATH:$HOME/.flutter/bin"' >> "$HOME/.bashrc"
+        export PATH="$PATH:$HOME/.flutter/bin"
+        flutter precache
+        flutter doctor
+      fi
       ;;
     esac
   done
