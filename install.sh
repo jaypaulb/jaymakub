@@ -52,13 +52,11 @@ else
   exit 1
 fi
 
-# Optional: Restore SSH/GPG keys and configs from HAL backup server
+# Optional: Restore SSH/GPG keys from HAL backup server (runs early for git operations)
 if [[ "$OMAKUB_HAL_RESTORE" == "yes" ]]; then
-  echo "[install.sh] Restoring from HAL backup..."
-  source ~/.local/share/omakub/install/hal-restore.sh
-  echo "[install.sh] ✓ HAL restore complete"
-else
-  echo "[install.sh] Skipping HAL restore"
+  echo "[install.sh] Restoring keys from HAL backup..."
+  source ~/.local/share/omakub/install/hal-restore-keys.sh
+  echo "[install.sh] ✓ HAL keys restore complete"
 fi
 
 # Desktop software and tweaks will only be installed if we're running Gnome
@@ -98,6 +96,13 @@ else
   source ~/.local/share/omakub/install/terminal.sh
   set -e
   echo "[install.sh] ✓ Terminal installers complete"
+fi
+
+# Optional: Restore configs from HAL backup server (runs last so configs aren't overwritten)
+if [[ "$OMAKUB_HAL_RESTORE" == "yes" ]]; then
+  echo "[install.sh] Restoring configs from HAL backup..."
+  source ~/.local/share/omakub/install/hal-restore-configs.sh
+  echo "[install.sh] ✓ HAL configs restore complete"
 fi
 
 echo "[install.sh] ✓ Jaymakub installation complete!"
