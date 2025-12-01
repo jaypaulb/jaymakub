@@ -32,19 +32,17 @@ else
   exit 1
 fi
 
-echo "[boot.sh] Updating apt and installing git..."
-if sudo apt-get update >/dev/null 2>&1; then
-  echo "[boot.sh] ✓ apt-get update complete"
+echo "[boot.sh] Checking for git..."
+if command -v git &>/dev/null; then
+  echo "[boot.sh] ✓ git already installed"
 else
-  echo "[boot.sh] ✗ apt-get update failed"
-  exit 1
-fi
-
-if sudo apt-get install -y git >/dev/null 2>&1; then
-  echo "[boot.sh] ✓ git installed"
-else
-  echo "[boot.sh] ✗ git installation failed"
-  exit 1
+  echo "[boot.sh] Installing git..."
+  if sudo apt-get update >/dev/null 2>&1 && sudo apt-get install -y git >/dev/null 2>&1; then
+    echo "[boot.sh] ✓ git installed"
+  else
+    echo "[boot.sh] ✗ git installation failed"
+    exit 1
+  fi
 fi
 
 echo "[boot.sh] Cloning Jaymakub repository..."
