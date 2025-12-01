@@ -10,9 +10,9 @@ if [[ -n "$JAYMAKUB_DEBUG" ]]; then
   export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 fi
 
-# Set up install log
+# Set up install log and state file
 export JAYMAKUB_LOG="$HOME/.jaymakub-install.log"
-echo "=== Jaymakub Installation Started: $(date) ===" > "$JAYMAKUB_LOG"
+export JAYMAKUB_STATE="$HOME/.jaymakub-state"
 
 # Logging helper function
 log() {
@@ -24,11 +24,21 @@ log() {
 }
 export -f log
 
+# State tracking functions
+mark_done() {
+  local item="$1"
+  echo "$item" >> "$JAYMAKUB_STATE"
+}
+export -f mark_done
+
+is_done() {
+  local item="$1"
+  [[ -f "$JAYMAKUB_STATE" ]] && grep -qxF "$item" "$JAYMAKUB_STATE" 2>/dev/null
+}
+export -f is_done
+
 # Give people a chance to retry running the installation
 trap 'log "ERROR" "Installation failed! You can retry by running: source ~/.local/share/omakub/install.sh"' ERR
-
-log "INFO" "Starting Jaymakub installation..."
-log "INFO" "Logging to $JAYMAKUB_LOG"
 
 # Check the distribution name and version and abort if incompatible
 echo "[install.sh] Checking system compatibility..."
@@ -39,10 +49,7 @@ else
   exit 1
 fi
 
-# Ask for app choices
-echo "[install.sh] Preparing interactive selection prompts..."
-echo "Get ready to make a few choices..."
-
+# Install gum first (needed for prompts)
 echo "[install.sh] Installing gum (interactive prompt tool)..."
 if source ~/.local/share/omakub/install/terminal/required/app-gum.sh >/dev/null 2>&1; then
   echo "[install.sh] ✓ Gum ready"
@@ -50,6 +57,34 @@ else
   echo "[install.sh] ✗ Gum installation failed"
   exit 1
 fi
+
+# Check for existing installation state
+export JAYMAKUB_RESUME="no"
+if [[ -f "$JAYMAKUB_STATE" ]]; then
+  completed_count=$(wc -l < "$JAYMAKUB_STATE")
+  echo ""
+  echo "Found previous installation with $completed_count completed steps."
+  echo ""
+  if gum confirm "Resume previous installation? (No = start fresh)"; then
+    export JAYMAKUB_RESUME="yes"
+    echo "=== Jaymakub Installation Resumed: $(date) ===" >> "$JAYMAKUB_LOG"
+    log "INFO" "Resuming installation ($completed_count steps already complete)"
+  else
+    rm -f "$JAYMAKUB_STATE"
+    echo "=== Jaymakub Installation Started (Fresh): $(date) ===" > "$JAYMAKUB_LOG"
+    log "INFO" "Starting fresh installation (cleared previous state)"
+  fi
+else
+  echo "=== Jaymakub Installation Started: $(date) ===" > "$JAYMAKUB_LOG"
+  log "INFO" "Starting new installation..."
+fi
+
+log "INFO" "Logging to $JAYMAKUB_LOG"
+log "INFO" "State file: $JAYMAKUB_STATE"
+
+# Ask for app choices
+echo "[install.sh] Preparing interactive selection prompts..."
+echo "Get ready to make a few choices..."
 
 echo "[install.sh] Loading first-run choices..."
 if source ~/.local/share/omakub/install/first-run-choices.sh; then

@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# Use log function from install.sh, or define fallback
+# Use log/state functions from install.sh, or define fallbacks
 if ! declare -f log > /dev/null; then
   log() { echo "[$1] $2"; }
+fi
+if ! declare -f mark_done > /dev/null; then
+  mark_done() { :; }
+fi
+if ! declare -f is_done > /dev/null; then
+  is_done() { return 1; }
 fi
 
 log "INFO" "=== Desktop Installers Started ==="
@@ -82,10 +88,16 @@ failed_installers=()
 for installer in ~/.local/share/omakub/install/desktop/{a-,applications,fonts,select-optional,set-}*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
-  log "INFO" "Running $installer_name..."
 
+  if is_done "desktop:$installer_name"; then
+    log "DONE" "$installer_name (already completed)"
+    continue
+  fi
+
+  log "INFO" "Running $installer_name..."
   if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
     log "OK" "$installer_name completed"
+    mark_done "desktop:$installer_name"
   else
     log "FAIL" "$installer_name failed (exit code: $?)"
     failed_installers+=("$installer_name")
@@ -97,16 +109,23 @@ for installer in ~/.local/share/omakub/install/desktop/app-*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
 
-  if should_install_desktop_app "$installer_name"; then
-    log "INFO" "Running $installer_name..."
-    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
-      log "OK" "$installer_name completed"
-    else
-      log "FAIL" "$installer_name failed (exit code: $?)"
-      failed_installers+=("$installer_name")
-    fi
-  else
+  if ! should_install_desktop_app "$installer_name"; then
     log "SKIP" "$installer_name (not selected)"
+    continue
+  fi
+
+  if is_done "desktop:$installer_name"; then
+    log "DONE" "$installer_name (already completed)"
+    continue
+  fi
+
+  log "INFO" "Running $installer_name..."
+  if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+    log "OK" "$installer_name completed"
+    mark_done "desktop:$installer_name"
+  else
+    log "FAIL" "$installer_name failed (exit code: $?)"
+    failed_installers+=("$installer_name")
   fi
 done
 
@@ -115,16 +134,23 @@ for installer in ~/.local/share/omakub/install/desktop/optional/*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
 
-  if should_install_optional_desktop_app "$installer_name"; then
-    log "INFO" "Running $installer_name..."
-    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
-      log "OK" "$installer_name completed"
-    else
-      log "FAIL" "$installer_name failed (exit code: $?)"
-      failed_installers+=("$installer_name")
-    fi
-  else
+  if ! should_install_optional_desktop_app "$installer_name"; then
     log "SKIP" "$installer_name (not selected)"
+    continue
+  fi
+
+  if is_done "desktop:$installer_name"; then
+    log "DONE" "$installer_name (already completed)"
+    continue
+  fi
+
+  log "INFO" "Running $installer_name..."
+  if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+    log "OK" "$installer_name completed"
+    mark_done "desktop:$installer_name"
+  else
+    log "FAIL" "$installer_name failed (exit code: $?)"
+    failed_installers+=("$installer_name")
   fi
 done
 
@@ -148,6 +174,16 @@ echo "=== Completed: $(date) ===" >> "$JAYMAKUB_LOG"
 
 log "INFO" "Full log saved to: $JAYMAKUB_LOG"
 log "INFO" "View failures: grep -E '(FAIL|ERROR)' ~/.jaymakub-install.log"
+
+# Mark installation as complete and clean up state file
+if [ ${#failed_installers[@]} -eq 0 ]; then
+  log "OK" "All installers completed successfully!"
+  rm -f "$JAYMAKUB_STATE"
+  log "INFO" "State file cleared - next run will be a fresh install"
+else
+  log "WARN" "Some installers failed - state file preserved for resume"
+  log "INFO" "Run 'source ~/.local/share/omakub/install.sh' to retry failed installers"
+fi
 
 # Logout to pickup changes
 gum confirm "Ready to reboot for all settings to take effect?" && sudo reboot || true
