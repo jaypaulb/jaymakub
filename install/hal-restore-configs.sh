@@ -4,7 +4,7 @@
 # This runs AFTER installers so restored configs aren't overwritten by defaults
 
 if [[ "$OMAKUB_HAL_RESTORE_CONFIGS" != "yes" ]]; then
-  exit 0
+  return 0 2>/dev/null || exit 0
 fi
 
 # HAL Configuration

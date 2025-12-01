@@ -4,7 +4,7 @@
 # This runs BEFORE installers so keys are available for git operations
 
 if [[ "$OMAKUB_HAL_RESTORE_KEYS" != "yes" ]]; then
-  exit 0
+  return 0 2>/dev/null || exit 0
 fi
 
 # HAL Configuration
