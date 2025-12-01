@@ -10,9 +10,10 @@ if [[ -n "$JAYMAKUB_DEBUG" ]]; then
   export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 fi
 
-# Set up install log and state file
+# Set up install log, state file, and choices file
 export JAYMAKUB_LOG="$HOME/.jaymakub-install.log"
 export JAYMAKUB_STATE="$HOME/.jaymakub-state"
+export JAYMAKUB_CHOICES="$HOME/.jaymakub-choices"
 
 # Logging helper function
 log() {
@@ -69,12 +70,19 @@ if [[ -f "$JAYMAKUB_STATE" ]]; then
     export JAYMAKUB_RESUME="yes"
     echo "=== Jaymakub Installation Resumed: $(date) ===" >> "$JAYMAKUB_LOG"
     log "INFO" "Resuming installation ($completed_count steps already complete)"
+
+    # Load saved choices from previous run
+    if [[ -f "$JAYMAKUB_CHOICES" ]]; then
+      log "INFO" "Loading saved choices from previous run"
+      source "$JAYMAKUB_CHOICES"
+    fi
   else
-    rm -f "$JAYMAKUB_STATE"
+    rm -f "$JAYMAKUB_STATE" "$JAYMAKUB_CHOICES"
     echo "=== Jaymakub Installation Started (Fresh): $(date) ===" > "$JAYMAKUB_LOG"
     log "INFO" "Starting fresh installation (cleared previous state)"
   fi
 else
+  rm -f "$JAYMAKUB_CHOICES"  # Clear any stale choices
   echo "=== Jaymakub Installation Started: $(date) ===" > "$JAYMAKUB_LOG"
   log "INFO" "Starting new installation..."
 fi
@@ -82,24 +90,45 @@ fi
 log "INFO" "Logging to $JAYMAKUB_LOG"
 log "INFO" "State file: $JAYMAKUB_STATE"
 
-# Ask for app choices
-echo "[install.sh] Preparing interactive selection prompts..."
-echo "Get ready to make a few choices..."
-
-echo "[install.sh] Loading first-run choices..."
-if source ~/.local/share/omakub/install/first-run-choices.sh; then
-  echo "[install.sh] ✓ User selections complete"
+# Ask for app choices (skip if resuming with saved choices)
+if [[ "$JAYMAKUB_RESUME" == "yes" && -f "$JAYMAKUB_CHOICES" ]]; then
+  echo "[install.sh] Using saved choices from previous run"
+  log "INFO" "HAL restore: $OMAKUB_HAL_RESTORE"
 else
-  echo "[install.sh] ✗ First-run choices failed"
-  exit 1
-fi
+  echo "[install.sh] Preparing interactive selection prompts..."
+  echo "Get ready to make a few choices..."
 
-echo "[install.sh] Collecting user identification..."
-if source ~/.local/share/omakub/install/identification.sh; then
-  echo "[install.sh] ✓ Identification collected"
-else
-  echo "[install.sh] ✗ Identification failed"
-  exit 1
+  echo "[install.sh] Loading first-run choices..."
+  if source ~/.local/share/omakub/install/first-run-choices.sh; then
+    echo "[install.sh] ✓ User selections complete"
+
+    # Save choices for resume
+    cat > "$JAYMAKUB_CHOICES" << EOF
+export OMAKUB_HAL_RESTORE="$OMAKUB_HAL_RESTORE"
+export OMAKUB_FIRST_RUN_TERMINAL_APPS="$OMAKUB_FIRST_RUN_TERMINAL_APPS"
+export OMAKUB_FIRST_RUN_DESKTOP_APPS="$OMAKUB_FIRST_RUN_DESKTOP_APPS"
+export OMAKUB_FIRST_RUN_LANGUAGES="$OMAKUB_FIRST_RUN_LANGUAGES"
+export OMAKUB_FIRST_RUN_DBS="$OMAKUB_FIRST_RUN_DBS"
+EOF
+    log "INFO" "Saved choices to $JAYMAKUB_CHOICES"
+  else
+    echo "[install.sh] ✗ First-run choices failed"
+    exit 1
+  fi
+
+  echo "[install.sh] Collecting user identification..."
+  if source ~/.local/share/omakub/install/identification.sh; then
+    echo "[install.sh] ✓ Identification collected"
+
+    # Append identification to choices
+    cat >> "$JAYMAKUB_CHOICES" << EOF
+export OMAKUB_USER_NAME="$OMAKUB_USER_NAME"
+export OMAKUB_USER_EMAIL="$OMAKUB_USER_EMAIL"
+EOF
+  else
+    echo "[install.sh] ✗ Identification failed"
+    exit 1
+  fi
 fi
 
 # Optional: Restore SSH/GPG keys from HAL backup server (runs early for git operations)

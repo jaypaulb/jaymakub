@@ -175,11 +175,11 @@ echo "=== Completed: $(date) ===" >> "$JAYMAKUB_LOG"
 log "INFO" "Full log saved to: $JAYMAKUB_LOG"
 log "INFO" "View failures: grep -E '(FAIL|ERROR)' ~/.jaymakub-install.log"
 
-# Mark installation as complete and clean up state file
+# Mark installation as complete and clean up state/choices files
 if [ ${#failed_installers[@]} -eq 0 ]; then
   log "OK" "All installers completed successfully!"
-  rm -f "$JAYMAKUB_STATE"
-  log "INFO" "State file cleared - next run will be a fresh install"
+  rm -f "$JAYMAKUB_STATE" "$JAYMAKUB_CHOICES"
+  log "INFO" "State and choices files cleared - next run will be a fresh install"
 else
   log "WARN" "Some installers failed - state file preserved for resume"
   log "INFO" "Run 'source ~/.local/share/omakub/install.sh' to retry failed installers"
