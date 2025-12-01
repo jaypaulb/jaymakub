@@ -1,3 +1,6 @@
 #!/bin/bash
 
-gsettings set org.gnome.shell.extensions.tophat meter-fg-color "#924d8b"
+# Only set tophat color if the extension schema is available
+if gsettings list-schemas 2>/dev/null | grep -q "org.gnome.shell.extensions.tophat"; then
+  gsettings set org.gnome.shell.extensions.tophat meter-fg-color "#924d8b"
+fi
