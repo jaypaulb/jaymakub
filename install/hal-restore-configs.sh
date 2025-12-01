@@ -21,10 +21,22 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
-log_success() { echo -e "${GREEN}[OK]${NC} $1"; }
-log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
-log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_info() {
+  echo -e "${BLUE}[INFO]${NC} $1"
+  [[ -n "$JAYMAKUB_LOG" ]] && echo "[$(date '+%H:%M:%S')] [HAL-CFG] $1" >> "$JAYMAKUB_LOG"
+}
+log_success() {
+  echo -e "${GREEN}[OK]${NC} $1"
+  [[ -n "$JAYMAKUB_LOG" ]] && echo "[$(date '+%H:%M:%S')] [HAL-CFG] OK: $1" >> "$JAYMAKUB_LOG"
+}
+log_warn() {
+  echo -e "${YELLOW}[WARN]${NC} $1"
+  [[ -n "$JAYMAKUB_LOG" ]] && echo "[$(date '+%H:%M:%S')] [HAL-CFG] WARN: $1" >> "$JAYMAKUB_LOG"
+}
+log_error() {
+  echo -e "${RED}[ERROR]${NC} $1"
+  [[ -n "$JAYMAKUB_LOG" ]] && echo "[$(date '+%H:%M:%S')] [HAL-CFG] ERROR: $1" >> "$JAYMAKUB_LOG"
+}
 
 check_hal_connection() {
     log_info "Testing connection to HAL (${HAL_HOST})..."
@@ -94,16 +106,25 @@ echo "=== HAL Restore: Configs Phase ==="
 echo "Restoring shell and app configs from HAL (${HAL_HOST})"
 echo
 
+log_info "Checking HAL connection..."
 if check_hal_connection; then
     echo
 
+    log_info "Prompting for shell configs restore..."
     if gum confirm "Restore shell configs (.bashrc, .gitconfig, etc.)?"; then
+        log_info "User selected YES for shell configs"
         restore_shell_configs
+    else
+        log_info "User selected NO for shell configs"
     fi
     echo
 
+    log_info "Prompting for app configs restore..."
     if gum confirm "Restore app configs (.claude, .cursor, .vscode, etc.)?"; then
+        log_info "User selected YES for app configs"
         restore_app_configs
+    else
+        log_info "User selected NO for app configs"
     fi
     echo
 
