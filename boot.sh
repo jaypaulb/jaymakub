@@ -21,9 +21,9 @@ sudo apt-get install -y git >/dev/null
 echo "Cloning Jaymakub..."
 rm -rf ~/.local/share/omakub
 git clone https://github.com/jaypaulb/jaymakub.git ~/.local/share/omakub >/dev/null
-if [[ $OMAKUB_REF != "master" ]]; then
+if [[ -n $OMAKUB_REF && $OMAKUB_REF != "master" ]]; then
 	cd ~/.local/share/omakub
-	git fetch origin "${OMAKUB_REF:-stable}" && git checkout "${OMAKUB_REF:-stable}"
+	git fetch origin "${OMAKUB_REF}" && git checkout "${OMAKUB_REF}"
 	cd -
 fi
 
