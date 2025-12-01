@@ -178,10 +178,13 @@ else
 fi
 
 # Optional: Restore configs from HAL backup server (runs last so configs aren't overwritten)
+log "INFO" "HAL restore setting: $OMAKUB_HAL_RESTORE"
 if [[ "$OMAKUB_HAL_RESTORE" == "yes" ]]; then
-  echo "[install.sh] Restoring configs from HAL backup..."
+  log "INFO" "Starting HAL configs restore..."
   source ~/.local/share/omakub/install/hal-restore-configs.sh
-  echo "[install.sh] ✓ HAL configs restore complete"
+  log "OK" "HAL configs restore complete"
+else
+  log "INFO" "Skipping HAL configs restore (not selected)"
 fi
 
-echo "[install.sh] ✓ Jaymakub installation complete!"
+log "OK" "Jaymakub installation complete!"
