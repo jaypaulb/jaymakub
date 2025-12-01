@@ -5,11 +5,16 @@ echo "[first-run-choices.sh] Starting user selection process..."
 # Exit on Ctrl+C
 trap 'echo -e "\n\n[first-run-choices.sh] Installation cancelled by user. Exiting..."; exit 130' INT
 
-# Ask about HAL restore (optional - for restoring SSH/GPG keys and configs from backup server)
-echo "[first-run-choices.sh] Prompting for HAL restore..."
-export OMAKUB_HAL_RESTORE=$(gum confirm "Restore SSH/GPG keys and configs from HAL backup server?" && echo "yes" || echo "no")
-[ $? -eq 130 ] && exit 130  # Exit if user pressed Ctrl+C
-echo "[first-run-choices.sh] HAL restore: $OMAKUB_HAL_RESTORE"
+# Ask about HAL restore - separate prompts for keys and configs
+echo "[first-run-choices.sh] Prompting for HAL restore options..."
+
+export OMAKUB_HAL_RESTORE_KEYS=$(gum confirm "Restore SSH/GPG keys from HAL backup server?" && echo "yes" || echo "no")
+[ $? -eq 130 ] && exit 130
+echo "[first-run-choices.sh] HAL restore keys: $OMAKUB_HAL_RESTORE_KEYS"
+
+export OMAKUB_HAL_RESTORE_CONFIGS=$(gum confirm "Restore configs (.bashrc, .gitconfig, app configs) from HAL?" && echo "yes" || echo "no")
+[ $? -eq 130 ] && exit 130
+echo "[first-run-choices.sh] HAL restore configs: $OMAKUB_HAL_RESTORE_CONFIGS"
 
 # Terminal CLI Apps - defaults preselected
 echo "[first-run-choices.sh] Prompting for terminal CLI apps..."

@@ -93,7 +93,8 @@ log "INFO" "State file: $JAYMAKUB_STATE"
 # Ask for app choices (skip if resuming with saved choices)
 if [[ "$JAYMAKUB_RESUME" == "yes" && -f "$JAYMAKUB_CHOICES" ]]; then
   echo "[install.sh] Using saved choices from previous run"
-  log "INFO" "HAL restore: $OMAKUB_HAL_RESTORE"
+  log "INFO" "HAL restore keys: $OMAKUB_HAL_RESTORE_KEYS"
+  log "INFO" "HAL restore configs: $OMAKUB_HAL_RESTORE_CONFIGS"
 else
   echo "[install.sh] Preparing interactive selection prompts..."
   echo "Get ready to make a few choices..."
@@ -104,7 +105,8 @@ else
 
     # Save choices for resume
     cat > "$JAYMAKUB_CHOICES" << EOF
-export OMAKUB_HAL_RESTORE="$OMAKUB_HAL_RESTORE"
+export OMAKUB_HAL_RESTORE_KEYS="$OMAKUB_HAL_RESTORE_KEYS"
+export OMAKUB_HAL_RESTORE_CONFIGS="$OMAKUB_HAL_RESTORE_CONFIGS"
 export OMAKUB_FIRST_RUN_TERMINAL_APPS="$OMAKUB_FIRST_RUN_TERMINAL_APPS"
 export OMAKUB_FIRST_RUN_DESKTOP_APPS="$OMAKUB_FIRST_RUN_DESKTOP_APPS"
 export OMAKUB_FIRST_RUN_LANGUAGES="$OMAKUB_FIRST_RUN_LANGUAGES"
@@ -132,10 +134,12 @@ EOF
 fi
 
 # Optional: Restore SSH/GPG keys from HAL backup server (runs early for git operations)
-if [[ "$OMAKUB_HAL_RESTORE" == "yes" ]]; then
-  echo "[install.sh] Restoring keys from HAL backup..."
+if [[ "$OMAKUB_HAL_RESTORE_KEYS" == "yes" ]]; then
+  log "INFO" "Starting HAL keys restore..."
   source ~/.local/share/omakub/install/hal-restore-keys.sh
-  echo "[install.sh] ✓ HAL keys restore complete"
+  log "OK" "HAL keys restore complete"
+else
+  log "INFO" "Skipping HAL keys restore (not selected)"
 fi
 
 # Desktop software and tweaks will only be installed if we're running Gnome
@@ -178,8 +182,7 @@ else
 fi
 
 # Optional: Restore configs from HAL backup server (runs last so configs aren't overwritten)
-log "INFO" "HAL restore setting: $OMAKUB_HAL_RESTORE"
-if [[ "$OMAKUB_HAL_RESTORE" == "yes" ]]; then
+if [[ "$OMAKUB_HAL_RESTORE_CONFIGS" == "yes" ]]; then
   log "INFO" "Starting HAL configs restore..."
   source ~/.local/share/omakub/install/hal-restore-configs.sh
   log "OK" "HAL configs restore complete"

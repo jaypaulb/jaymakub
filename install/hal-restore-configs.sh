@@ -3,7 +3,7 @@
 # HAL Restore Configs - Restore shell and app configs from HAL backup server (runs last)
 # This runs AFTER installers so restored configs aren't overwritten by defaults
 
-if [[ "$OMAKUB_HAL_RESTORE" != "yes" ]]; then
+if [[ "$OMAKUB_HAL_RESTORE_CONFIGS" != "yes" ]]; then
   exit 0
 fi
 

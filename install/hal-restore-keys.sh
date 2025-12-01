@@ -3,7 +3,7 @@
 # HAL Restore Keys - Restore SSH/GPG keys from HAL backup server (runs early)
 # This runs BEFORE installers so keys are available for git operations
 
-if [[ "$OMAKUB_HAL_RESTORE" != "yes" ]]; then
+if [[ "$OMAKUB_HAL_RESTORE_KEYS" != "yes" ]]; then
   exit 0
 fi
 
