@@ -15,6 +15,10 @@ echo -e "$ascii_art"
 echo "=> Jaymakub is for fresh Ubuntu 24.04+ installations only!"
 echo -e "\nBegin installation (or abort with ctrl+c)..."
 
+# Request sudo upfront and keep it alive
+sudo -v
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
 sudo apt-get update >/dev/null
 sudo apt-get install -y git >/dev/null
 

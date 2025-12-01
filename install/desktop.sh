@@ -17,12 +17,14 @@ should_install_desktop_app() {
     *helium*) display_name="Helium" ;;
     *localsend*) display_name="LocalSend" ;;
     *logseq*) display_name="Logseq" ;;
+    *obs-studio*) display_name="OBS Studio" ;;
     *onlyoffice*) display_name="OnlyOffice" ;;
     *pinta*) display_name="Pinta" ;;
     *synergy*) display_name="Synergy" ;;
     *typora*) display_name="Typora" ;;
     *vlc*) display_name="VLC" ;;
     *xournalpp*) display_name="Xournal++" ;;
+    *zed*) display_name="Zed" ;;
     *wl-clipboard*) return 0 ;; # Always install system utilities
     *) return 0 ;; # Install non-app installers (flatpak, fonts, etc.)
   esac
@@ -48,7 +50,6 @@ should_install_optional_desktop_app() {
     *libreoffice*) display_name="LibreOffice" ;;
     *mainline*) display_name="Mainline Kernels" ;;
     *minecraft*) display_name="Minecraft" ;;
-    *obs-studio*) display_name="OBS Studio" ;;
     *obsidian*) display_name="Obsidian" ;;
     *retroarch*) display_name="RetroArch" ;;
     *rubymine*) display_name="RubyMine" ;;
@@ -60,7 +61,6 @@ should_install_optional_desktop_app() {
     *select-web-apps*) display_name="Web Apps" ;;
     *windows*) display_name="Windows" ;;
     *windsurf*) display_name="Windsurf" ;;
-    *zed*) display_name="Zed" ;;
     *zoom*) display_name="Zoom" ;;
     *) return 1 ;;
   esac

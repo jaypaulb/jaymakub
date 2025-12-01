@@ -17,7 +17,7 @@ export OMAKUB_FIRST_RUN_TERMINAL_APPS=$(gum choose "${AVAILABLE_TERMINAL_APPS[@]
 if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]]; then
   # Desktop Apps - defaults preselected
   AVAILABLE_DESKTOP_APPS=("1password" "Alacritty" "ASDControl" "Audacity" "Bitwarden" "Brave" "Chrome" "Cursor" "Discord" "Doom Emacs" "Dropbox" "Flameshot" "GIMP" "Gnome Sushi" "Gnome Tweaks" "Helium" "LibreOffice" "LocalSend" "Logseq" "Mainline Kernels" "Minecraft" "OBS Studio" "Obsidian" "OnlyOffice" "Pinta" "RetroArch" "RubyMine" "Signal" "Spotify" "Steam" "Synergy" "Typora" "VirtualBox" "VLC" "VSCode" "Web Apps" "Windows" "Windsurf" "Xournal++" "Zed" "Zoom")
-  SELECTED_DESKTOP_APPS="Alacritty,Bitwarden,Chrome,Cursor,Flameshot,Gnome Sushi,Gnome Tweaks,Helium,LocalSend,Logseq,OnlyOffice,Pinta,Synergy,Typora,VLC,Xournal++"
+  SELECTED_DESKTOP_APPS="Alacritty,Bitwarden,Chrome,Cursor,Flameshot,Gnome Sushi,Gnome Tweaks,Helium,LocalSend,Logseq,OBS Studio,OnlyOffice,Pinta,Synergy,Typora,VLC,Xournal++,Zed"
   export OMAKUB_FIRST_RUN_DESKTOP_APPS=$(gum choose "${AVAILABLE_DESKTOP_APPS[@]}" --no-limit --selected "$SELECTED_DESKTOP_APPS" --height 25 --header "Select desktop apps (defaults preselected)")
   [ $? -eq 130 ] && exit 130  # Exit if user pressed Ctrl+C
 fi
