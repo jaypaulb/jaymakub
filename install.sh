@@ -10,10 +10,25 @@ if [[ -n "$JAYMAKUB_DEBUG" ]]; then
   export PS4='+(${BASH_SOURCE}:${LINENO}): ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
 fi
 
-# Give people a chance to retry running the installation
-trap 'echo "[install.sh] ✗ Installation failed! You can retry by running: source ~/.local/share/omakub/install.sh"' ERR
+# Set up install log
+export JAYMAKUB_LOG="$HOME/.jaymakub-install.log"
+echo "=== Jaymakub Installation Started: $(date) ===" > "$JAYMAKUB_LOG"
 
-echo "[install.sh] Starting Jaymakub installation..."
+# Logging helper function
+log() {
+  local level="$1"
+  local msg="$2"
+  local timestamp=$(date '+%H:%M:%S')
+  echo "[$timestamp] [$level] $msg" >> "$JAYMAKUB_LOG"
+  echo "[$level] $msg"
+}
+export -f log
+
+# Give people a chance to retry running the installation
+trap 'log "ERROR" "Installation failed! You can retry by running: source ~/.local/share/omakub/install.sh"' ERR
+
+log "INFO" "Starting Jaymakub installation..."
+log "INFO" "Logging to $JAYMAKUB_LOG"
 
 # Check the distribution name and version and abort if incompatible
 echo "[install.sh] Checking system compatibility..."

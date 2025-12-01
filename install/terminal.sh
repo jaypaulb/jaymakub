@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Use log function from install.sh, or define fallback
+if ! declare -f log > /dev/null; then
+  log() { echo "[$1] $2"; }
+fi
+
+log "INFO" "=== Terminal Installers Started ==="
+
 # Needed for all installers
 sudo apt update -y
 sudo apt upgrade -y
@@ -55,12 +62,12 @@ failed_installers=()
 for installer in ~/.local/share/omakub/install/terminal/{01,02,04}-*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
-  echo "Running $installer_name..."
+  log "INFO" "Running $installer_name..."
 
-  if source "$installer"; then
-    echo "✓ $installer_name completed successfully"
+  if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+    log "OK" "$installer_name completed"
   else
-    echo "✗ $installer_name failed (exit code: $?)"
+    log "FAIL" "$installer_name failed (exit code: $?)"
     failed_installers+=("$installer_name")
   fi
 done
@@ -71,15 +78,15 @@ for installer in ~/.local/share/omakub/install/terminal/03-*.sh; do
   installer_name=$(basename "$installer")
 
   if should_install_terminal_app "$installer_name"; then
-    echo "Running $installer_name..."
-    if source "$installer"; then
-      echo "✓ $installer_name completed successfully"
+    log "INFO" "Running $installer_name..."
+    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+      log "OK" "$installer_name completed"
     else
-      echo "✗ $installer_name failed (exit code: $?)"
+      log "FAIL" "$installer_name failed (exit code: $?)"
       failed_installers+=("$installer_name")
     fi
   else
-    echo "⊝ Skipping $installer_name (not selected)"
+    log "SKIP" "$installer_name (not selected)"
   fi
 done
 
@@ -89,25 +96,24 @@ for installer in ~/.local/share/omakub/install/terminal/optional/*.sh; do
   installer_name=$(basename "$installer")
 
   if should_install_optional_terminal_app "$installer_name"; then
-    echo "Running $installer_name..."
-    if source "$installer"; then
-      echo "✓ $installer_name completed successfully"
+    log "INFO" "Running $installer_name..."
+    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+      log "OK" "$installer_name completed"
     else
-      echo "✗ $installer_name failed (exit code: $?)"
+      log "FAIL" "$installer_name failed (exit code: $?)"
       failed_installers+=("$installer_name")
     fi
   else
-    echo "⊝ Skipping $installer_name (not selected)"
+    log "SKIP" "$installer_name (not selected)"
   fi
 done
 
 # Report any failures at the end
 if [ ${#failed_installers[@]} -gt 0 ]; then
-  echo ""
-  echo "WARNING: The following installers failed:"
+  log "WARN" "The following terminal installers failed:"
   for failed in "${failed_installers[@]}"; do
-    echo "  - $failed"
+    log "WARN" "  - $failed"
   done
-  echo ""
-  echo "You can retry individual installers later or re-run: source ~/.local/share/omakub/install.sh"
 fi
+
+log "INFO" "=== Terminal Installers Finished ==="

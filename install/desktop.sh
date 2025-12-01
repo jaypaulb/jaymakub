@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Use log function from install.sh, or define fallback
+if ! declare -f log > /dev/null; then
+  log() { echo "[$1] $2"; }
+fi
+
+log "INFO" "=== Desktop Installers Started ==="
+
 # Helper function to check if desktop app was selected
 should_install_desktop_app() {
   local app_name=$1
@@ -75,12 +82,12 @@ failed_installers=()
 for installer in ~/.local/share/omakub/install/desktop/{a-,applications,fonts,select-optional,set-}*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
-  echo "Running $installer_name..."
+  log "INFO" "Running $installer_name..."
 
-  if source "$installer"; then
-    echo "✓ $installer_name completed successfully"
+  if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+    log "OK" "$installer_name completed"
   else
-    echo "✗ $installer_name failed (exit code: $?)"
+    log "FAIL" "$installer_name failed (exit code: $?)"
     failed_installers+=("$installer_name")
   fi
 done
@@ -91,15 +98,15 @@ for installer in ~/.local/share/omakub/install/desktop/app-*.sh; do
   installer_name=$(basename "$installer")
 
   if should_install_desktop_app "$installer_name"; then
-    echo "Running $installer_name..."
-    if source "$installer"; then
-      echo "✓ $installer_name completed successfully"
+    log "INFO" "Running $installer_name..."
+    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+      log "OK" "$installer_name completed"
     else
-      echo "✗ $installer_name failed (exit code: $?)"
+      log "FAIL" "$installer_name failed (exit code: $?)"
       failed_installers+=("$installer_name")
     fi
   else
-    echo "⊝ Skipping $installer_name (not selected)"
+    log "SKIP" "$installer_name (not selected)"
   fi
 done
 
@@ -109,28 +116,38 @@ for installer in ~/.local/share/omakub/install/desktop/optional/*.sh; do
   installer_name=$(basename "$installer")
 
   if should_install_optional_desktop_app "$installer_name"; then
-    echo "Running $installer_name..."
-    if source "$installer"; then
-      echo "✓ $installer_name completed successfully"
+    log "INFO" "Running $installer_name..."
+    if source "$installer" 2>&1 | tee -a "$JAYMAKUB_LOG"; then
+      log "OK" "$installer_name completed"
     else
-      echo "✗ $installer_name failed (exit code: $?)"
+      log "FAIL" "$installer_name failed (exit code: $?)"
       failed_installers+=("$installer_name")
     fi
   else
-    echo "⊝ Skipping $installer_name (not selected)"
+    log "SKIP" "$installer_name (not selected)"
   fi
 done
 
 # Report any failures at the end
 if [ ${#failed_installers[@]} -gt 0 ]; then
-  echo ""
-  echo "WARNING: The following desktop installers failed:"
+  log "WARN" "The following desktop installers failed:"
   for failed in "${failed_installers[@]}"; do
-    echo "  - $failed"
+    log "WARN" "  - $failed"
   done
-  echo ""
-  echo "You can retry individual installers later or re-run: source ~/.local/share/omakub/install.sh"
 fi
+
+log "INFO" "=== Desktop Installers Finished ==="
+
+# Write summary to log
+echo "" >> "$JAYMAKUB_LOG"
+echo "=== Installation Summary ===" >> "$JAYMAKUB_LOG"
+echo "Log file: $JAYMAKUB_LOG" >> "$JAYMAKUB_LOG"
+echo "To view: cat ~/.jaymakub-install.log" >> "$JAYMAKUB_LOG"
+echo "To view failures only: grep -E '(FAIL|ERROR)' ~/.jaymakub-install.log" >> "$JAYMAKUB_LOG"
+echo "=== Completed: $(date) ===" >> "$JAYMAKUB_LOG"
+
+log "INFO" "Full log saved to: $JAYMAKUB_LOG"
+log "INFO" "View failures: grep -E '(FAIL|ERROR)' ~/.jaymakub-install.log"
 
 # Logout to pickup changes
 gum confirm "Ready to reboot for all settings to take effect?" && sudo reboot || true
