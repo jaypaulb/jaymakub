@@ -188,3 +188,6 @@ else
 fi
 
 log "OK" "Jaymakub installation complete!"
+
+# Reboot prompt - at the very end after all phases complete
+gum confirm "Ready to reboot for all settings to take effect?" && sudo reboot || true

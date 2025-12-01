@@ -184,6 +184,3 @@ else
   log "WARN" "Some installers failed - state file preserved for resume"
   log "INFO" "Run 'source ~/.local/share/omakub/install.sh' to retry failed installers"
 fi
-
-# Logout to pickup changes
-gum confirm "Ready to reboot for all settings to take effect?" && sudo reboot || true
