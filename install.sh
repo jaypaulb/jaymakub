@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Exit immediately if a command exits with a non-zero status
+# Exit immediately if a command exits with a non-zero status during setup
+# Note: We disable this during the installer loops to allow graceful failure handling
 set -e
 
 # Give people a chance to retry running the installation
@@ -28,16 +29,23 @@ if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]]; then
 
   echo "Installing terminal and desktop tools..."
 
-  # Install terminal tools
+  # Install terminal tools (disable set -e to allow graceful failure handling)
+  set +e
   source ~/.local/share/omakub/install/terminal.sh
+  set -e
 
-  # Install desktop tools and tweaks
+  # Install desktop tools and tweaks (disable set -e to allow graceful failure handling)
+  set +e
   source ~/.local/share/omakub/install/desktop.sh
+  set -e
 
   # Revert to normal idle and lock settings
   gsettings set org.gnome.desktop.screensaver lock-enabled true
   gsettings set org.gnome.desktop.session idle-delay 300
 else
   echo "Only installing terminal tools..."
+  # Disable set -e to allow graceful failure handling
+  set +e
   source ~/.local/share/omakub/install/terminal.sh
+  set -e
 fi
