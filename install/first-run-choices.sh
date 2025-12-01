@@ -49,7 +49,8 @@ echo "[first-run-choices.sh] Selected terminal apps: $OMAKUB_FIRST_RUN_TERMINAL_
 if [[ "$XDG_CURRENT_DESKTOP" == *"GNOME"* ]]; then
   echo "[first-run-choices.sh] Prompting for desktop apps..."
   # Desktop Apps - defaults preselected
-  AVAILABLE_DESKTOP_APPS=("1password" "Alacritty" "ASDControl" "Audacity" "Bitwarden" "Brave" "Chrome" "Cursor" "Discord" "Doom Emacs" "Dropbox" "Flameshot" "GIMP" "Gnome Sushi" "Gnome Tweaks" "Helium" "LibreOffice" "LocalSend" "Logseq" "Mainline Kernels" "Minecraft" "OBS Studio" "Obsidian" "OnlyOffice" "Pinta" "RetroArch" "RubyMine" "Signal" "Spotify" "Steam" "Synergy" "Typora" "VirtualBox" "VLC" "VSCode" "Web Apps" "Windows" "Windsurf" "Xournal++" "Zed" "Zoom")
+  # Note: "Gnome Extensions" is NOT selected by default - it can crash terminal/shell
+  AVAILABLE_DESKTOP_APPS=("1password" "Alacritty" "ASDControl" "Audacity" "Bitwarden" "Brave" "Chrome" "Cursor" "Discord" "Doom Emacs" "Dropbox" "Flameshot" "GIMP" "Gnome Extensions" "Gnome Sushi" "Gnome Tweaks" "Helium" "LibreOffice" "LocalSend" "Logseq" "Mainline Kernels" "Minecraft" "OBS Studio" "Obsidian" "OnlyOffice" "Pinta" "RetroArch" "RubyMine" "Signal" "Spotify" "Steam" "Synergy" "Typora" "VirtualBox" "VLC" "VSCode" "Web Apps" "Windows" "Windsurf" "Xournal++" "Zed" "Zoom")
   SELECTED_DESKTOP_APPS="Alacritty,Bitwarden,Chrome,Cursor,Flameshot,Gnome Sushi,Gnome Tweaks,Helium,LocalSend,Logseq,OBS Studio,OnlyOffice,Pinta,Synergy,Typora,VLC,Xournal++,Zed"
   export OMAKUB_FIRST_RUN_DESKTOP_APPS=$(gum_choose "${AVAILABLE_DESKTOP_APPS[@]}" --no-limit --selected "$SELECTED_DESKTOP_APPS" --height 25 --header "Select desktop apps (defaults preselected)")
   echo "[first-run-choices.sh] Selected desktop apps: $OMAKUB_FIRST_RUN_DESKTOP_APPS"

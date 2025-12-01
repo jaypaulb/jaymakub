@@ -84,10 +84,29 @@ should_install_optional_desktop_app() {
 # Run desktop installers with error handling
 failed_installers=()
 
+# Helper to check if base installer should run (some are user-selectable)
+should_run_base_installer() {
+  local installer_name=$1
+  case "$installer_name" in
+    set-gnome-extensions.sh)
+      # Only run if user selected "Gnome Extensions"
+      echo "$OMAKUB_FIRST_RUN_DESKTOP_APPS" | grep -q "Gnome Extensions"
+      ;;
+    *)
+      return 0  # Run all other base installers
+      ;;
+  esac
+}
+
 # Install base desktop installers (flatpak, fonts, etc.)
 for installer in ~/.local/share/omakub/install/desktop/{a-,applications,fonts,select-optional,set-}*.sh; do
   [ -f "$installer" ] || continue
   installer_name=$(basename "$installer")
+
+  if ! should_run_base_installer "$installer_name"; then
+    log "SKIP" "$installer_name (not selected)"
+    continue
+  fi
 
   if is_done "desktop:$installer_name"; then
     log "DONE" "$installer_name (already completed)"
