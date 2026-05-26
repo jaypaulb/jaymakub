@@ -1,8 +1,4 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
+# Jaymakub
 
 Jaymakub is a customized fork of Omakub - a single-command system to transform a fresh Ubuntu 24.04+ installation into a fully-configured web development environment with GNOME desktop. It includes integrated HAL backup restoration and custom app selections.
 
